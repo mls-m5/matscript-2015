@@ -1,0 +1,30 @@
+
+
+
+class Ship {
+	
+}
+
+
+
+function main(string args[]) {
+	
+	if (args.size == 1) {
+		switch(args[0]) {
+			case "apa" {
+				print("hej")
+			}
+			case "bepa" {
+				print("då")
+			}
+			case "cepa" {
+				print("re")
+			}
+			case "depa" print("mi")
+		}
+	}
+	
+	auto ship = new Ship
+	
+	return 0
+}
