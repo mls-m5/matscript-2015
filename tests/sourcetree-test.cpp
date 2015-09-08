@@ -15,8 +15,9 @@ TEST_SUIT_BEGIN
 
 TEST_CASE("sourcetree basic test") {
 	string apa = R"tag(
-int main() {
+int main(argv[]) {
    //Comment
+   print ("hejsan");
 }
 
 )tag";
@@ -25,6 +26,9 @@ int main() {
 
 	st.print();
 }
+
+
+
 
 TEST_CASE("blockify") {
 	string code = R"raw(
@@ -47,6 +51,9 @@ def afterApa = 1;
 }
 
 
+
+
+
 TEST_CASE("binarise") {
 	string code = R"raw(
 def i = 1 * 3 + 3 * 4 ^ 5, j = 2 + 3 * 3
@@ -62,6 +69,9 @@ def i = 1 * 3 + 3 * 4 ^ 5, j = 2 + 3 * 3
 }
 
 
+
+
+
 TEST_CASE("source to source") {
 	//First simple test
 
@@ -75,12 +85,32 @@ TEST_CASE("source to source") {
 
 	{
 		string code = R"raw(
-   def apa = 1 + 1
-   def bepa = apa 
+
+class Ship {
+   def render() {
+      draw(x, y);
+   }
+   def move(int nx, int ny) {
+      x = nx;
+      y = ny;
+   }
+   
+   def int x, y;
+   def float vx, vy;
+};
+
+def Ship ship;
+
+def apa = 1 + 1;
+def bepa = apa;
+
+
 )raw";
 
 		Tokenizer tokenizer(code);
 		SourceTree st(tokenizer);
+
+		st.print();
 
 		auto returnCode = st.toToken();
 

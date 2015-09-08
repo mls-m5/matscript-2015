@@ -10,6 +10,14 @@
 #include <list>
 using namespace std;
 
+vector<string> SourceTreeTypes = {
+	"Line",
+	"Block",
+	"Paranthesis",
+	"Brackets",
+	"BinaryExpression",
+};
+
 SourceTree createSubTree(list<CompositeToken> &l) {
 	SourceTree subTree;
 	for (auto it: l) {
@@ -23,12 +31,16 @@ SourceTree::iterator BlockifySourceTree(SourceTree &st, SourceTree::iterator beg
 	for (auto it = begin; it != end; ) {
 		if (it->_name == beginToken) {
 			auto beginIt = it;
-			++beginIt;
+			auto beginToken = beginIt->_name;
+
+			beginIt = st.erase(beginIt);
+//			++beginIt;
 			auto endIt = BlockifySourceTree(st, beginIt, end, beginToken, endToken, type);
 			SourceTree newSt;
 
 			newSt.splice(newSt.end(), st, beginIt, endIt);
 			newSt._type = type;
+			newSt._name = beginToken;
 			if (newSt.back()._name == endToken) {
 				newSt._endToken = newSt.back()._name;
 				newSt.pop_back();
@@ -51,7 +63,6 @@ SourceTree::iterator BlockifySourceTree(SourceTree &st, SourceTree::iterator beg
 
 SourceTree::SourceTree(Tokenizer &tokenizer)
 {
-	cout << "hej" << endl;
 	auto tokens = tokenizer.splitToToken();
 	Token leadingSpace;
 
@@ -117,6 +128,9 @@ Token SourceTree::toToken() {
 		for (auto &it: *this) {
 			returnToken += it.toToken();
 		}
+		if (not _endToken.empty()) {
+			returnToken += _endToken.toToken();
+		}
 	}
 
 
@@ -139,7 +153,7 @@ void SourceTree::print(int recursionDepth) {
 			it->print(recursionDepth + 1);
 
 			indent(cout, recursionDepth);
-			cout << _name;
+			cout << _name << endl;
 
 			++it;
 			it->print(recursionDepth + 1);
@@ -154,7 +168,7 @@ void SourceTree::print(int recursionDepth) {
 			cout << "#root" << endl;
 		}
 		indent(cout, recursionDepth);
-		cout << _name << endl;
+		cout << "'" << _name << "'             ----(" << SourceTreeTypes[_type] << ")" << endl;
 		for (auto &it : *this) {
 			it.print(recursionDepth + 1);
 		}
@@ -167,6 +181,11 @@ void SourceTree::print(int recursionDepth) {
 
 void SourceTree::Blockify(std::string startTag, std::string endTag, Type type) {
 	BlockifySourceTree(*this, begin(), end(), startTag, endTag, type);
+
+	for (auto &it: *this) {
+		it.Blockify(startTag, endTag, type);
+	}
+
 }
 
 void SourceTree::Binarise(const std::string& operatorTag) {
@@ -184,10 +203,8 @@ void SourceTree::Binarise(const std::string& operatorTag) {
 			it = erase(it);
 			if (it == end()) {
 				cerr << "binary expression in end of expression when searching for " << operatorTag << ", expecting another expression" << endl;
-//				return;
+				return;
 			}
-
-//			++it;
 			stB.splice(stB.begin(), *this, it, end());
 			stB.Binarise(operatorTag);
 
@@ -205,8 +222,6 @@ void SourceTree::Binarise(const std::string& operatorTag) {
 			return;
 		}
 	}
-
-	//recurse call
 
 	for (auto &it: *this) {
 		it.Binarise(operatorTag);
